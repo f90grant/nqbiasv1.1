@@ -1,6 +1,6 @@
 # NQ Daily Bias
 
-A free, automated pre-market bias for Nasdaq futures (NQ). Every weekday around 8:40 ET it:
+A free, automated pre-market bias for Nasdaq futures (NQ). Every weekday around 8:50 ET it:
 
 1. Pulls NQ overnight structure, ES, VIX, the 10-year yield, the dollar and premarket moves of the biggest Nasdaq stocks (Yahoo Finance), today's USD economic calendar (ForexFactory), the **FinancialJuice** squawk feed (headlines plus data prints vs forecast), watchlist earnings (Nasdaq.com calendar) and backup headlines (CNBC/MarketWatch RSS).
 2. Scores it with transparent rules into **STRONG/LEAN LONG**, **STRONG/LEAN SHORT** or **CHOP / NEUTRAL**, plus a separate chop-risk score.
@@ -37,7 +37,7 @@ In your repo go to **Settings → Secrets and variables → Actions → New repo
 ### 4. Test it
 **Actions** tab → *NQ daily bias* → **Run workflow** (cmd `run`, force `true`). Within about a minute you should get a Discord post, and the dashboard updates after Pages redeploys (around 1 to 2 minutes).
 
-From then on it runs on its own: the brief around 8:40 to 9:00 ET and the grade around 4:20 to 5:20 ET. GitHub's scheduler can start a few minutes late. If timing matters, hit **Run workflow** manually, or point a free cron-job.org job at the workflow_dispatch API.
+From then on it runs on its own. The brief is attempted at 8:50, 9:05 and 9:20 ET, because GitHub's scheduler often starts late or skips a slot. Only the first successful attempt counts: the call is locked in once per day and never rewritten, and nothing runs after 9:28, so every graded call was made before the bell. The later attempts only retry a Discord post that failed. Grading runs around 4:20 to 6:20 ET.
 
 ---
 
@@ -55,7 +55,7 @@ From then on it runs on its own: the brief around 8:40 to 9:00 ET and the grade 
 
 Score ≥ 3 is STRONG, ≥ 1 is LEAN, and anything between −1 and +1 is CHOP.
 
-**Chop score** adds up: opening inside the prior day's range (+1), overnight range under 70% of its 10-day average (+1), NQ and ES pointing different ways (+1), bull and bear factors cancelling out (+1), a Fed event later in the day (+1.5), or a high-impact release during RTH (+0.5). A chop score of 2.5 or more overrides a LEAN call to CHOP and knocks a STRONG call down to LEAN.
+**Chop score** adds up: opening inside the prior day's range (+1), overnight range under 70% of its 10-day average (+1), NQ and ES pointing different ways (+1), bull and bear factors cancelling out (+1), a Fed event later in the day (+1.5), or a high-impact release during RTH (+0.5). A US market holiday adds +1.5. A "Fed event" means a rate decision, statement, press conference, minutes or a high-impact Fed chair appearance, not an ordinary Fed speaker. A chop score of 2.5 or more overrides a LEAN call to CHOP and knocks a STRONG call down to LEAN.
 
 All thresholds live in `bias/config.py`.
 
@@ -73,8 +73,11 @@ cd docs && python -m http.server       # then open http://localhost:8000
 
 ## Notes
 - The AI read leans mainly on the FinancialJuice headlines. Data prints ("Actual X (Forecast Y)") are parsed and shown as above or below forecast. They don't move the score yet. Once we have a few weeks of graded days, we can test adding a "data surprise" factor.
-- Yahoo data is free but unofficial and slightly delayed. If it breaks, run `pip install -U yfinance` (the workflow installs the latest version every run).
-- Holidays: on market-closed days the brief still posts with stale data and grading is skipped. Ignore it.
+- All moves (NQ gap, ES, mega-caps, VIX, yields, dollar) are measured from the same reference: yesterday's 4:00pm ET cash close. If a market has no quote yet today, its factor scores 0 and says so instead of showing a fake 0.00% move.
+- Every day's per-factor points are saved in `docs/data/history.json`, so after 30+ graded days we can check which factors actually predict the day and drop the ones that don't.
+- Yahoo data is free but unofficial, and futures quotes lag about 10 minutes. That's why the first run is at 8:50, not 8:31: it needs to see the reaction to 8:30 data. If it breaks, run `pip install -U yfinance` (the workflow installs the latest version every run).
+- Holidays: the brief flags US holidays and stale quotes at the top and raises the chop score.
+- If Google retires the Gemini model, add a repo variable `GEMINI_MODEL` with the new model name. Until then the brief falls back to the plain template summary.
 - Ideas for v2: a Discord `/bias` slash command (needs an always-on host), a 9:45 "opening range" follow-up, and logging your own trades next to the bias to see whether you trade better when you follow it.
 
 *Informational tool, not financial advice.*

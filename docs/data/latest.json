@@ -1,6 +1,6 @@
 {
  "date": "2026-11-10",
- "generated": "2026-11-10T15:47:35.363617-05:00",
+ "generated": "2026-11-10T22:19:05.059676-05:00",
  "snapshot": {
   "asof": "2026-11-10T08:52:00-05:00",
   "date": "2026-11-10",
@@ -15,6 +15,8 @@
    "pdc": 23104.210470551083,
    "onh": 23410.324334595764,
    "onl": 23025.753010318735,
+   "price_time": "2026-11-10T08:52:00-05:00",
+   "stale_min": 0,
    "on_range": 384.5713242770289,
    "on_range_avg10": 422.9960149526236,
    "prior_rth_range": 315.6520710077675,
@@ -23,22 +25,26 @@
   "es": {
    "last": 6890.25,
    "prev": 6861.5,
-   "chg_pct": 0.42
+   "chg_pct": 0.42,
+   "fresh": true
   },
   "vix": {
    "last": 16.4,
    "prev": 17.3,
-   "chg_pct": -5.2
+   "chg_pct": -5.2,
+   "fresh": true
   },
   "tnx": {
    "last": 4.08,
    "prev": 4.11,
-   "chg_bp": -3.0
+   "chg_bp": -3.0,
+   "fresh": true
   },
   "dxy": {
    "last": 99.41,
    "prev": 99.52,
-   "chg_pct": -0.11
+   "chg_pct": -0.11,
+   "fresh": true
   },
   "megacaps": [
    {
@@ -168,13 +174,15 @@
     "time": "2026-11-10T08:31:00-05:00",
     "url": "",
     "fj": true,
+    "relevant": true,
     "print": {
      "name": "US Core PPI MoM",
      "actual": 0.1,
      "forecast": 0.2,
      "previous": 0.3,
      "unit": "%",
-     "surprise": -0.1
+     "surprise": -0.1,
+     "us": true
     }
    },
    {
@@ -183,13 +191,15 @@
     "time": "2026-11-10T08:30:00-05:00",
     "url": "",
     "fj": true,
+    "relevant": true,
     "print": {
      "name": "US PPI YoY",
      "actual": 2.4,
      "forecast": 2.6,
      "previous": 2.7,
      "unit": "%",
-     "surprise": -0.2
+     "surprise": -0.2,
+     "us": true
     }
    },
    {
@@ -197,21 +207,24 @@
     "source": "FinancialJuice",
     "time": "2026-11-10T08:12:00-05:00",
     "url": "",
-    "fj": true
+    "fj": true,
+    "relevant": true
    },
    {
     "title": "Nvidia +2.8% premarket, chip names firm after AMD results (SAMPLE)",
     "source": "FinancialJuice",
     "time": "2026-11-10T07:45:00-05:00",
     "url": "",
-    "fj": true
+    "fj": true,
+    "relevant": true
    },
    {
     "title": "China October exports beat expectations (SAMPLE)",
     "source": "FinancialJuice",
     "time": "2026-11-10T06:02:00-05:00",
     "url": "",
-    "fj": true
+    "fj": true,
+    "relevant": true
    }
   ],
   "headlines": [
@@ -245,6 +258,7 @@
     "previous": 0.3,
     "unit": "%",
     "surprise": -0.1,
+    "us": true,
     "time": "2026-11-10T08:31:00-05:00"
    },
    {
@@ -254,9 +268,11 @@
     "previous": 2.7,
     "unit": "%",
     "surprise": -0.2,
+    "us": true,
     "time": "2026-11-10T08:30:00-05:00"
    }
   ],
+  "flags": [],
   "breadth_pct": 0.9071174377224198,
   "top_movers": [
    {
@@ -376,8 +392,9 @@
    }
   ],
   "playbook": [
-   "Favor longs while above 23104; look for pullbacks to ONH/PDH to hold as support.",
-   "Bias invalidated on acceptance back below 23026 (ONL)."
+   "Favor longs while price holds above PDH 23146.",
+   "First upside reference: ONH 23410.",
+   "Bias is wrong if price accepts back below PDH 23146."
   ]
  },
  "narrative": {
@@ -849,7 +866,17 @@
    "chop_score": 0,
    "confidence": 80,
    "headline_tone": "n/a",
-   "price_at_call": 23381.97226746257
+   "price_at_call": 23381.97226746257,
+   "called_at": "22:19",
+   "factors": {
+    "Gap": 1,
+    "Location": 1,
+    "Overnight trend": 0.5,
+    "Mega-cap breadth": 1,
+    "VIX": 0.5,
+    "10Y yield": 0,
+    "Dollar (DXY)": 0
+   }
   }
  ]
 }

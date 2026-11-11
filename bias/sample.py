@@ -37,10 +37,10 @@ def sample_snapshot() -> dict:
         "asof": DEMO_NOW.isoformat(), "date": DEMO_NOW.date().isoformat(), "sample": True,
         "errors": [],
         "nq": nq,
-        "es": {"last": 6890.25, "prev": 6861.5, "chg_pct": 0.42},
-        "vix": {"last": 16.4, "prev": 17.3, "chg_pct": -5.2},
-        "tnx": {"last": 4.08, "prev": 4.11, "chg_bp": -3.0},
-        "dxy": {"last": 99.41, "prev": 99.52, "chg_pct": -0.11},
+        "es": {"last": 6890.25, "prev": 6861.5, "chg_pct": 0.42, "fresh": True},
+        "vix": {"last": 16.4, "prev": 17.3, "chg_pct": -5.2, "fresh": True},
+        "tnx": {"last": 4.08, "prev": 4.11, "chg_bp": -3.0, "fresh": True},
+        "dxy": {"last": 99.41, "prev": 99.52, "chg_pct": -0.11, "fresh": True},
         "megacaps": [
             {"sym": s, "weight": w, "last": 0, "chg_pct": c}
             for (s, w), c in zip(C.MEGACAPS.items(),
@@ -59,7 +59,8 @@ def sample_snapshot() -> dict:
         ],
         "squawk": [
             {"title": t, "source": "FinancialJuice", "time": DEMO_NOW.replace(hour=h, minute=mi).isoformat(),
-             "url": "", "fj": True, **({"print": parse_print(t)} if parse_print(t) else {})}
+             "url": "", "fj": True, "relevant": True,
+             **({"print": dict(parse_print(t), us=True)} if parse_print(t) else {})}
             for h, mi, t in [
                 (8, 31, "US Core PPI MoM Actual 0.1% (Forecast 0.2%, Previous 0.3%) (SAMPLE)"),
                 (8, 30, "US PPI YoY Actual 2.4% (Forecast 2.6%, Previous 2.7%) (SAMPLE)"),

@@ -5,6 +5,7 @@ from __future__ import annotations
 import calendar
 import datetime as dt
 import re
+import time
 import traceback
 
 import feedparser
@@ -15,6 +16,8 @@ import yfinance as yf
 from . import config as C
 
 UA = {"User-Agent": "Mozilla/5.0 (nq-bias research bot)"}
+BROWSER_UA = ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
+              "(KHTML, like Gecko) Chrome/130.0 Safari/537.36")
 
 
 def _now_et() -> dt.datetime:
@@ -32,6 +35,7 @@ def _to_et(df: pd.DataFrame) -> pd.DataFrame:
 def nq_levels(bars: pd.DataFrame, now: dt.datetime) -> dict:
     """Prior RTH high/low/close/open, overnight high/low and 10-day overnight
     range average from intraday bars (index in ET). Pure function, unit-tested."""
+    bars = bars.dropna(subset=["Close"])
     t = bars.index.time
     rth = bars[(t >= dt.time(9, 30)) & (t < dt.time(16, 0))]
     today = now.date()
@@ -64,6 +68,8 @@ def nq_levels(bars: pd.DataFrame, now: dt.datetime) -> dict:
         "onh": float(on["High"].max()) if len(on) else price,
         "onl": float(on["Low"].min()) if len(on) else price,
     }
+    out["price_time"] = bars.index[-1].isoformat()
+    out["stale_min"] = round((now - bars.index[-1]).total_seconds() / 60)
     out["on_range"] = out["onh"] - out["onl"]
     out["on_range_avg10"] = sum(on_ranges) / len(on_ranges) if on_ranges else None
     out["prior_rth_range"] = out["pdh"] - out["pdl"]
@@ -71,27 +77,55 @@ def nq_levels(bars: pd.DataFrame, now: dt.datetime) -> dict:
     return out
 
 
+def _history(symbol: str, **kw) -> pd.DataFrame:
+    """yfinance call with retries (Yahoo throttles shared cloud IPs now and then)."""
+    last = None
+    for attempt in range(3):
+        try:
+            df = yf.Ticker(symbol).history(**kw)
+            if len(df):
+                return _to_et(df)
+            last = ValueError(f"{symbol}: empty response")
+        except Exception as e:  # noqa: BLE001
+            last = e
+        time.sleep(2 * (attempt + 1))
+    raise last
+
+
 def get_nq(now: dt.datetime) -> dict:
-    bars = yf.Ticker(C.NQ).history(period="30d", interval="15m", prepost=True)
-    return nq_levels(_to_et(bars), now)
+    bars = _history(C.NQ, period="30d", interval="15m", prepost=True)
+    return nq_levels(bars, now)
+
+
+def change_since_close(bars: pd.DataFrame, now: dt.datetime) -> dict:
+    """Latest price vs the 4:00pm ET cash close of the last session before today.
+    Same reference for every symbol, so NQ/ES/mega-cap moves are comparable.
+    `fresh` is False when there is no quote from today yet (e.g. ^TNX before 8:20)."""
+    bars = bars.dropna(subset=["Close"])
+    t = bars.index.time
+    rth = bars[(t >= dt.time(9, 30)) & (t < dt.time(16, 0)) & (bars.index.date < now.date())]
+    if rth.empty:
+        raise ValueError("no prior session in bars")
+    prev = float(rth["Close"].iloc[-1])
+    last = float(bars["Close"].iloc[-1])
+    fresh = bars.index[-1].date() == now.date()
+    return {"last": last, "prev": prev, "chg_pct": (last / prev - 1) * 100 if fresh else 0.0,
+            "fresh": bool(fresh)}
 
 
 def last_vs_prev(symbol: str, now: dt.datetime) -> dict:
-    """Latest (incl. pre/post market) price vs the last daily close before today."""
-    tk = yf.Ticker(symbol)
-    daily = tk.history(period="10d", interval="1d")
-    daily = daily[[d.date() < now.date() for d in daily.index]]
-    prev = float(daily["Close"].iloc[-1])
-    intra = tk.history(period="2d", interval="5m", prepost=True)
-    last = float(intra["Close"].dropna().iloc[-1]) if len(intra) else prev
-    return {"last": last, "prev": prev, "chg_pct": (last / prev - 1) * 100}
+    return change_since_close(_history(symbol, period="5d", interval="5m", prepost=True), now)
 
 
 def get_macro(now: dt.datetime) -> dict:
     out = {}
     for key, sym in (("es", C.ES), ("vix", C.VIX), ("tnx", C.TNX), ("dxy", C.DXY)):
-        out[key] = last_vs_prev(sym, now)
-    out["tnx"]["chg_bp"] = (out["tnx"]["last"] - out["tnx"]["prev"]) * 100
+        try:
+            out[key] = last_vs_prev(sym, now)
+        except Exception as e:  # one dead symbol must not drop the others
+            print(f"[data] {sym}: {e}")
+    if "tnx" in out:
+        out["tnx"]["chg_bp"] = (out["tnx"]["last"] - out["tnx"]["prev"]) * 100 if out["tnx"]["fresh"] else 0.0
     return out
 
 
@@ -100,9 +134,10 @@ def get_megacaps(now: dt.datetime) -> list[dict]:
     for sym, w in C.MEGACAPS.items():
         try:
             r = last_vs_prev(sym, now)
-            rows.append({"sym": sym, "weight": w, "last": r["last"], "chg_pct": r["chg_pct"]})
-        except Exception:
-            continue
+            if r["fresh"]:      # no premarket print yet = no information, leave it out
+                rows.append({"sym": sym, "weight": w, "last": r["last"], "chg_pct": r["chg_pct"]})
+        except Exception as e:
+            print(f"[data] {sym}: {e}")
     return rows
 
 
@@ -114,7 +149,7 @@ def get_calendar(now: dt.datetime) -> list[dict]:
     r.raise_for_status()
     events = []
     for e in r.json():
-        if e.get("country") != "USD" or e.get("impact") not in ("High", "Medium"):
+        if e.get("country") != "USD" or e.get("impact") not in ("High", "Medium", "Holiday"):
             continue
         when = dt.datetime.fromisoformat(e["date"]).astimezone(C.ET)
         if when.date() != now.date():
@@ -139,7 +174,8 @@ def _prev_weekday(now: dt.datetime) -> dt.date:
 
 def _nasdaq_day(d: dt.date) -> list[dict]:
     r = requests.get("https://api.nasdaq.com/api/calendar/earnings", params={"date": d.isoformat()},
-                     headers={**UA, "Accept": "application/json, text/plain, */*",
+                     headers={"User-Agent": BROWSER_UA, "Accept": "application/json, text/plain, */*",
+                              "Accept-Language": "en-US,en;q=0.9",
                               "Origin": "https://www.nasdaq.com", "Referer": "https://www.nasdaq.com/"},
                      timeout=20)
     r.raise_for_status()
@@ -176,11 +212,16 @@ def get_earnings(now: dt.datetime) -> list[dict]:
 
 
 # ------------------------------------------------------------------------ news
-MOVERS = ("fed", "powell", "cpi", "inflation", "jobs", "payroll", "tariff", "rate",
-          "yield", "treasury", "nvidia", "apple", "microsoft", "amazon", "meta",
-          "alphabet", "google", "tesla", "broadcom", "earnings", "guidance", "nasdaq",
-          "futures", "recession", "gdp", "pce", "fomc", "china", "chip", "ai ", "ppi",
-          "jobless", "claims", "ism", "retail sales", "trump", "white house", "s&p", "nq", "us ")
+MOVERS = re.compile(
+    r"\b(fed|fomc|powell|cpi|ppi|pce|gdp|inflation|jobs|jobless|claims|payrolls?|nfp|ism|pmi|"
+    r"retail sales|tariffs?|rates?|yields?|treasur(?:y|ies)|nvidia|apple|microsoft|amazon|meta|"
+    r"alphabet|google|tesla|broadcom|amd|earnings|guidance|nasdaq|s&p|futures|recession|"
+    r"china|chips?|semiconductors?|ai|trump|white house|shutdown|us|u\.s\.)\b", re.I)
+
+
+def is_us_print(p: dict) -> bool:
+    return bool(re.match(r"(us|u\.s\.)\b", p["name"], re.I))
+
 
 # FinancialJuice data headlines look like:
 #   "US CPI (YoY) Actual: 3.1% (Forecast 3.0%, Previous 2.9%)"
@@ -231,12 +272,17 @@ def get_financialjuice(now: dt.datetime) -> list[dict]:
         title = re.sub(r"^FinancialJuice:\s*", "", e.get("title", "").strip(), flags=re.I)
         item = {"title": title, "source": "FinancialJuice", "time": when.isoformat(),
                 "url": e.get("link", ""), "fj": True}
+        item["relevant"] = bool(MOVERS.search(title))
         p = parse_print(title)
         if p:
+            p["us"] = is_us_print(p)
             item["print"] = p
         out.append(item)
+    # keep what matters for NQ when the feed is busy, then show newest first
+    out.sort(key=lambda x: (x["relevant"], x["time"]), reverse=True)
+    out = out[: C.FJ_LIMIT]
     out.sort(key=lambda x: x["time"], reverse=True)
-    return out[: C.FJ_LIMIT]
+    return out
 
 
 def get_headlines(now: dt.datetime, hours: int = 16, limit: int = 10) -> list[dict]:
@@ -260,7 +306,7 @@ def get_headlines(now: dt.datetime, hours: int = 16, limit: int = 10) -> list[di
         k = it["title"].lower()[:60]
         if k and k not in seen:
             seen.add(k)
-            it["relevant"] = any(m in k for m in MOVERS)
+            it["relevant"] = bool(MOVERS.search(it["title"]))
             uniq.append(it)
     uniq.sort(key=lambda x: (x["relevant"], x["time"]), reverse=True)
     return uniq[:limit]
@@ -287,7 +333,8 @@ def collect(now: dt.datetime | None = None) -> dict:
             snap["errors"].append(f"{key}: {type(e).__name__}: {e}")
             traceback.print_exc()
     snap.update(snap.pop("macro", {}) or {})
-    snap["prints"] = [dict(h["print"], time=h["time"]) for h in snap.get("squawk") or [] if "print" in h]
+    snap["prints"] = [dict(h["print"], time=h["time"]) for h in snap.get("squawk") or []
+                      if "print" in h and h["print"].get("us")]
     return snap
 
 

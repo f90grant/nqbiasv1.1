@@ -9,6 +9,11 @@ from __future__ import annotations
 from . import config as C
 
 
+# ForexFactory titles that mean an actual policy event (a plain "FOMC Member X Speaks" is not one)
+FED_EVENTS = ("fomc statement", "federal funds rate", "fomc press conference", "fomc meeting minutes",
+              "fomc economic projections")
+
+
 def _f(name, value, pts, note, group="direction"):
     return {"name": name, "value": value, "points": pts, "note": note, "group": group}
 
@@ -17,6 +22,9 @@ def factors(s: dict) -> tuple[list[dict], list[dict]]:
     """Returns (direction_factors, chop_factors)."""
     d, chop = [], []
     nq = s.get("nq") or {}
+    s["flags"] = []
+    if nq and (nq.get("stale_min") or 0) > 30:
+        s["flags"].append(f"NQ quote is {nq['stale_min']} min old (holiday, halt or data outage?). Treat this brief with caution.")
 
     if nq:
         price, gap = nq["price"], nq["gap_pct"]
@@ -80,21 +88,25 @@ def factors(s: dict) -> tuple[list[dict], list[dict]]:
     if vix:
         v, ch = vix["last"], vix["chg_pct"]
         val = f"{v:.1f} ({ch:+.1f}%)"
-        if ch >= C.VIX_SPIKE_PCT:
+        if not vix.get("fresh", True):
+            d.append(_f("VIX", f"{v:.1f} (prior close)", 0, "No VIX quote yet today"))
+        elif ch >= C.VIX_SPIKE_PCT:
             d.append(_f("VIX", val, -1, "Volatility bid: risk-off"))
         elif ch <= C.VIX_DROP_PCT:
             d.append(_f("VIX", val, 0.5, "Volatility crushed: risk-on"))
         else:
             d.append(_f("VIX", val, 0, "VIX steady"))
         if v >= C.VIX_HIGH_LEVEL:
-            s.setdefault("flags", []).append("VIX above 25: expect wide, whippy ranges. Size down.")
+            s["flags"].append("VIX above 25: expect wide, whippy ranges. Size down.")
 
     # 6. 10-year yield (NQ is rate-sensitive)
     tnx = s.get("tnx") or {}
     if tnx:
         bp = tnx["chg_bp"]
         val = f"{tnx['last']:.2f}% ({bp:+.1f}bp)"
-        if bp >= C.YIELD_BP:
+        if not tnx.get("fresh", True):
+            d.append(_f("10Y yield", f"{tnx['last']:.2f}% (prior close)", 0, "No yield quote yet today"))
+        elif bp >= C.YIELD_BP:
             d.append(_f("10Y yield", val, -0.5, "Yields rising: headwind for tech"))
         elif bp <= -C.YIELD_BP:
             d.append(_f("10Y yield", val, 0.5, "Yields falling: tailwind for tech"))
@@ -106,7 +118,9 @@ def factors(s: dict) -> tuple[list[dict], list[dict]]:
     if dxy:
         ch = dxy["chg_pct"]
         val = f"{dxy['last']:.2f} ({ch:+.2f}%)"
-        if ch >= C.DXY_PCT:
+        if not dxy.get("fresh", True):
+            d.append(_f("Dollar (DXY)", f"{dxy['last']:.2f} (prior close)", 0, "No dollar quote yet today"))
+        elif ch >= C.DXY_PCT:
             d.append(_f("Dollar (DXY)", val, -0.5, "Strong dollar: tightening conditions"))
         elif ch <= -C.DXY_PCT:
             d.append(_f("Dollar (DXY)", val, 0.5, "Weak dollar: supportive"))
@@ -115,7 +129,7 @@ def factors(s: dict) -> tuple[list[dict], list[dict]]:
 
     # chop: NQ and ES disagree
     es = s.get("es") or {}
-    if es and nq:
+    if es and nq and es.get("fresh", True):
         if es["chg_pct"] * nq["gap_pct"] < 0 and abs(es["chg_pct"]) > 0.1 and abs(nq["gap_pct"]) > 0.1:
             chop.append(_f("NQ/ES divergence", f"NQ {nq['gap_pct']:+.2f}% / ES {es['chg_pct']:+.2f}%",
                            1, "Indexes disagree: rotation, not trend", "chop"))
@@ -129,11 +143,14 @@ def factors(s: dict) -> tuple[list[dict], list[dict]]:
     # chop: event risk later in the session
     for e in s.get("events") or []:
         t, title = e["time"], e["title"].lower()
-        if "fomc" in title or "federal funds" in title or "fed chair" in title or "powell" in title:
+        if any(k in title for k in FED_EVENTS) or ("fed chair" in title and e["impact"] == "High"):
             if t >= "12:00":
                 chop.append(_f("Fed event", f"{t} {e['title']}", 1.5,
                                "Fed later today: chop into the release is typical", "chop"))
                 break
+    hol = next((e for e in (s.get("events") or []) if e["impact"] == "Holiday"), None)
+    if hol:
+        chop.append(_f("US holiday", hol["title"], 1.5, "Holiday trade: thin volume, shortened or closed session", "chop"))
     late = [e for e in (s.get("events") or []) if e["impact"] == "High" and "09:30" <= e["time"] <= "15:30"]
     if late and not any(c["name"] == "Fed event" for c in chop):
         e = late[0]
@@ -188,12 +205,26 @@ def playbook(direction: str, nq: dict, s: dict) -> list[str]:
     if not nq:
         return []
     p = []
+    price = nq["price"]
+    lv = {"PDH": nq["pdh"], "PDL": nq["pdl"], "PDC": nq["pdc"], "ONH": nq["onh"], "ONL": nq["onl"]}
+    below = sorted(((v, k) for k, v in lv.items() if v < price - 1), reverse=True)
+    above = sorted((v, k) for k, v in lv.items() if v > price + 1)
+    sup = f"{below[0][1]} {below[0][0]:.0f}" if below else None
+    res = f"{above[0][1]} {above[0][0]:.0f}" if above else None
     if direction == "long":
-        p.append(f"Favor longs while above {max(nq['pdc'], nq['onl']):.0f}; look for pullbacks to ONH/PDH to hold as support.")
-        p.append(f"Bias invalidated on acceptance back below {nq['onl']:.0f} (ONL).")
+        p.append(f"Favor longs while price holds above {sup}." if sup else
+                 "Price is below every reference level; a long bias needs a reclaim first.")
+        p.append(f"First upside reference: {res}." if res else
+                 "Above all of yesterday's and overnight levels: no overhead reference, so don't chase extension.")
+        if sup:
+            p.append(f"Bias is wrong if price accepts back below {sup}.")
     elif direction == "short":
-        p.append(f"Favor shorts while below {min(nq['pdc'], nq['onh']):.0f}; look for rallies into ONL/PDL to fail.")
-        p.append(f"Bias invalidated on acceptance back above {nq['onh']:.0f} (ONH).")
+        p.append(f"Favor shorts while price stays below {res}." if res else
+                 "Price is above every reference level; a short bias needs a breakdown first.")
+        p.append(f"First downside reference: {sup}." if sup else
+                 "Below all of yesterday's and overnight levels: no support reference, so don't chase extension.")
+        if res:
+            p.append(f"Bias is wrong if price accepts back above {res}.")
     else:
         p.append(f"Expect rotation between {nq['pdl']:.0f} and {nq['pdh']:.0f}. Fade the edges or wait for a clean break plus retest.")
         p.append("Cut size or sit out the first 15 minutes. Chop days punish chasing.")

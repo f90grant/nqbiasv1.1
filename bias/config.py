@@ -37,14 +37,17 @@ ON_RANGE_TIGHT = 0.70     # overnight range < 70% of its 10-day avg = compressed
 OUTCOME_PCT = 0.40        # post-close grading: |close-open| above this = trend day
 
 # --- Schedule guards (ET) ---
-RUN_WINDOW = ("08:20", "09:45")    # pre-open run accepted in this window
+# Yahoo futures quotes lag ~10 min, so 8:45 is the first run that "sees" the 8:30 data.
+# The window closes before the bell so every graded call was made pre-open.
+RUN_WINDOW = ("08:45", "09:28")
 GRADE_WINDOW = ("16:05", "19:00")
 
 # --- Keys (all optional; set as GitHub Actions secrets) ---
 GEMINI_KEY = os.getenv("GEMINI_API_KEY", "")        # free tier: AI narrative
-GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+# tried in order; override with a GEMINI_MODEL repo variable if Google retires these
+GEMINI_MODEL = os.getenv("GEMINI_MODEL") or "gemini-2.5-flash,gemini-flash-latest"
 ANTHROPIC_KEY = os.getenv("ANTHROPIC_API_KEY", "")  # optional paid alternative
-ANTHROPIC_MODEL = os.getenv("ANTHROPIC_MODEL", "claude-haiku-5-5")
+ANTHROPIC_MODEL = os.getenv("ANTHROPIC_MODEL") or "claude-haiku-5-5"
 DISCORD_WEBHOOK = os.getenv("DISCORD_WEBHOOK_URL", "")
 DASHBOARD_URL = os.getenv("DASHBOARD_URL", "")
 

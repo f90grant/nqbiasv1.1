@@ -74,7 +74,7 @@
   ul.plain li:first-child{border-top:0}
   .t{font-family:var(--mono);color:var(--ink2);margin-right:8px}
   .imp{font-size:10px;padding:1px 6px;border-radius:4px;margin-left:6px;font-weight:700}
-  .imp.High{background:var(--short-bg);color:var(--short)} .imp.Medium{background:rgba(245,158,11,.12);color:var(--warn)}
+  .imp.Holiday{background:var(--chop-bg);color:var(--ink2)} .imp.High{background:var(--short-bg);color:var(--short)} .imp.Medium{background:rgba(245,158,11,.12);color:var(--warn)}
   .narr{white-space:pre-wrap;color:var(--ink);line-height:1.65}
   .src{color:var(--muted);font-size:11px;margin-top:10px}
   table{width:100%;border-collapse:collapse;font-size:13px}
@@ -106,6 +106,7 @@ const $ = (h) => { const t = document.createElement('template'); t.innerHTML = h
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const fmt = (n, d=2) => n == null || isNaN(n) ? '–' : Number(n).toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d});
 const sgn = (n, d=2) => n == null ? '–' : (n > 0 ? '+' : '') + Number(n).toFixed(d);
+const safeUrl = (u) => /^https?:\/\//i.test(u || '') ? u : '';
 const cls = (n) => n > 0 ? 'pos' : n < 0 ? 'neg' : 'zero';
 
 async function load() {
@@ -125,9 +126,14 @@ function render({ latest, history }) {
 
   app.append($(`<header>
     <h1><b>NQ</b> Daily Bias${s.sample ? '<span class="badge sample">SAMPLE DATA</span>' : ''}</h1>
-    <div class="meta">${esc(latest.date)} · generated ${when.toLocaleTimeString('en-US',{timeZone:'America/New_York',hour:'numeric',minute:'2-digit'})} ET</div>
+    <div class="meta">${esc(latest.date)} · called ${when.toLocaleTimeString('en-US',{timeZone:'America/New_York',hour:'numeric',minute:'2-digit'})} ET</div>
   </header>`));
 
+  const todayET = new Date().toLocaleDateString('en-CA', {timeZone:'America/New_York'});
+  const dow = new Date().toLocaleDateString('en-US', {timeZone:'America/New_York', weekday:'short'});
+  if (!s.sample && latest.date !== todayET && !['Sat','Sun'].includes(dow))
+    app.append($(`<div class="err"><b>This brief is from ${esc(latest.date)}.</b> Today's run hasn't landed yet (it posts between 8:50 and 9:25 ET). Don't trade off yesterday's bias.</div>`));
+  if ((s.flags || []).length) app.append($(`<div class="err">${s.flags.map(esc).join(' · ')}</div>`));
   if ((s.errors || []).length) app.append($(`<div class="err">Some sources failed this run: ${s.errors.map(esc).join(' · ')}</div>`));
 
   // hero
@@ -221,8 +227,8 @@ function render({ latest, history }) {
     ${prints.length ? `<table style="margin-bottom:12px"><tr><th>Data print</th><th class="r">Actual</th><th class="r">Fcst</th><th class="r">Prev</th><th>vs fcst</th></tr>
       ${prints.map(p=>`<tr><td>${esc(p.name)} <span class="note">${tET(p.time)}</span></td><td class="r"><b>${p.actual}${esc(p.unit)}</b></td><td class="r">${p.forecast}${esc(p.unit)}</td><td class="r">${p.previous ?? '–'}${p.previous!=null?esc(p.unit):''}</td>
         <td>${p.surprise > 0 ? '▲ above' : p.surprise < 0 ? '▼ below' : '= in line'}</td></tr>`).join('')}</table>` : ''}
-    <ul class="plain hl">${sq.map(x=>`<li><span class="t">${tET(x.time)}</span>${x.url?`<a href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.title)}</a>`:esc(x.title)}</li>`).join('') || '<li class="empty">No FinancialJuice headlines fetched</li>'}</ul>
-    ${other.length ? `<h2 style="margin-top:16px">Other headlines</h2><ul class="plain hl">${other.slice(0,6).map(x=>`<li>${x.url?`<a href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.title)}</a>`:esc(x.title)}<small>${esc(x.source)} · ${tET(x.time)}</small></li>`).join('')}</ul>` : ''}
+    <ul class="plain hl">${sq.map(x=>`<li><span class="t">${tET(x.time)}</span>${safeUrl(x.url)?`<a href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.title)}</a>`:esc(x.title)}</li>`).join('') || '<li class="empty">No FinancialJuice headlines fetched</li>'}</ul>
+    ${other.length ? `<h2 style="margin-top:16px">Other headlines</h2><ul class="plain hl">${other.slice(0,6).map(x=>`<li>${safeUrl(x.url)?`<a href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.title)}</a>`:esc(x.title)}<small>${esc(x.source)} · ${tET(x.time)}</small></li>`).join('')}</ul>` : ''}
   </div>`));
 
   // track record

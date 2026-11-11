@@ -1,6 +1,8 @@
 """Posts to Discord through a channel webhook (free, no bot hosting needed)."""
 from __future__ import annotations
 
+import time
+
 import requests
 
 from . import config as C
@@ -10,6 +12,27 @@ COLORS = {"long": 0x22C55E, "short": 0xEF4444, "chop": 0x9CA3AF}
 
 def _trim(s: str, n: int) -> str:
     return s if len(s) <= n else s[: n - 1] + "…"
+
+
+def _size(embed: dict) -> int:
+    return (len(embed.get("title", "")) + len(embed.get("description", "")) +
+            len(embed.get("footer", {}).get("text", "")) +
+            sum(len(f["name"]) + len(f["value"]) for f in embed.get("fields", [])))
+
+
+def _fit(embed: dict, limit: int = 5800) -> dict:
+    """Discord rejects embeds over 6000 characters in total; shrink the longest parts."""
+    embed["title"] = _trim(embed["title"], 256)
+    for _ in range(40):
+        over = _size(embed) - limit
+        if over <= 0:
+            break
+        big = max(embed["fields"], key=lambda f: len(f["value"]))
+        if len(embed["description"]) >= len(big["value"]):
+            embed["description"] = _trim(embed["description"], max(300, len(embed["description"]) - over - 1))
+        else:
+            big["value"] = _trim(big["value"], max(100, len(big["value"]) - over - 1))
+    return embed
 
 
 def bias_embed(rep: dict) -> dict:
@@ -43,7 +66,7 @@ def bias_embed(rep: dict) -> dict:
              "footer": {"text": f"{rep['date']} • NQ {nq.get('price', 0):,.2f} • Context only, not trade advice"}}
     if C.DASHBOARD_URL:
         embed["url"] = C.DASHBOARD_URL
-    return embed
+    return _fit(embed)
 
 
 def grade_embed(entry: dict, stats: dict) -> dict:
@@ -63,8 +86,18 @@ def send(embed: dict) -> bool:
     if not C.DISCORD_WEBHOOK:
         print("[discord] DISCORD_WEBHOOK_URL not set; skipping post")
         return False
-    r = requests.post(C.DISCORD_WEBHOOK, json={"username": "NQ Bias", "embeds": [embed]}, timeout=20)
-    if r.status_code >= 300:
+    for attempt in range(3):
+        try:
+            r = requests.post(C.DISCORD_WEBHOOK, json={"username": "NQ Bias", "embeds": [embed]}, timeout=20)
+        except requests.RequestException as e:   # never let Discord take the whole run down
+            print("[discord] network error:", type(e).__name__)
+            time.sleep(3)
+            continue
+        if r.status_code < 300:
+            return True
+        if r.status_code == 429 or r.status_code >= 500:
+            time.sleep(min(float(r.headers.get("Retry-After", 2)), 10))
+            continue
         print("[discord] error", r.status_code, r.text[:300])
         return False
-    return True
+    return False

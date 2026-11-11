@@ -1,6 +1,6 @@
 """CLI.
 
-  python -m bias run            pre-open brief (8:20 to 9:45 ET window)
+  python -m bias run            pre-open brief (8:45 to 9:28 ET window, once per day)
   python -m bias grade          post-close grading (16:05 to 19:00 ET window)
   python -m bias run --sample   offline demo with built-in sample data
   add --force to ignore the time window, --no-discord to skip posting
@@ -58,6 +58,18 @@ def run(args):
     if not (args.force or args.sample) and not _in_window(now, C.RUN_WINDOW):
         print(f"outside run window ({now:%a %H:%M} ET); use --force to override")
         return 0
+    prev = _load(_path("latest.json"), {})
+    if not (args.force or args.sample) and prev.get("date") == now.date().isoformat() \
+            and not prev.get("snapshot", {}).get("sample"):
+        # Today's call is already locked in. Backup runs never overwrite it (that would let
+        # later data leak into a graded call); they only retry a Discord post that failed.
+        if not prev.get("posted") and C.DISCORD_WEBHOOK and not args.no_discord:
+            prev["posted"] = discord_post.send(discord_post.bias_embed(prev))
+            _save(_path("latest.json"), prev)
+            print("retried Discord post:", "ok" if prev["posted"] else "failed")
+        else:
+            print("today's brief already exists; nothing to do")
+        return 0
     if args.sample:
         from .sample import sample_snapshot
         snap = sample_snapshot()
@@ -73,9 +85,7 @@ def run(args):
     rep = {"date": snap["date"], "generated": now.isoformat(), "snapshot": snap,
            "result": res, "narrative": narr}
 
-    prev = _load(_path("latest.json"), {})
-    already_posted = prev.get("date") == rep["date"] and prev.get("posted") and not args.force
-    rep["posted"] = prev.get("posted", False) if already_posted else False
+    rep["posted"] = False
 
     if args.sample:
         from .sample import sample_history
@@ -86,12 +96,17 @@ def run(args):
     history = [h for h in history if h["date"] != rep["date"]]
     entry = {"date": rep["date"], "call": res["call"], "direction": res["direction"],
              "score": res["score"], "chop_score": res["chop_score"], "confidence": res["confidence"],
-             "headline_tone": narr["headline_tone"], "price_at_call": (snap.get("nq") or {}).get("price")}
+             "headline_tone": narr["headline_tone"], "price_at_call": (snap.get("nq") or {}).get("price"),
+             "called_at": now.strftime("%H:%M"),
+             # per-factor points, so later we can test which factors actually predict the day
+             "factors": {f["name"]: f["points"] for f in res["factors"] + res["chop_factors"]}}
     entry.update({k: v for k, v in old.items() if k not in entry})  # keep grade if re-run
+    if "outcome" in entry:
+        entry["hit"] = entry["direction"] == entry["outcome"]
     history.append(entry)
     history.sort(key=lambda h: h["date"])
 
-    if not (args.no_discord or args.sample or already_posted):
+    if not (args.no_discord or args.sample):
         rep["posted"] = discord_post.send(discord_post.bias_embed(rep))
     rep["stats"] = stats(history)
 
@@ -121,7 +136,11 @@ def grade(args):
     if not entry:
         print("no bias call logged for today; nothing to grade")
         return 0
-    rth = data.rth_result(now)
+    try:
+        rth = data.rth_result(now)
+    except Exception as e:
+        print(f"could not grade today ({e}); leaving the call ungraded")
+        return 0
     move = (rth["close"] / rth["open"] - 1) * 100
     outcome = "long" if move >= C.OUTCOME_PCT else "short" if move <= -C.OUTCOME_PCT else "chop"
     was_graded = "hit" in entry
