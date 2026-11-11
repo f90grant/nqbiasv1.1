@@ -1,0 +1,855 @@
+{
+ "date": "2026-11-10",
+ "generated": "2026-11-10T15:47:35.363617-05:00",
+ "snapshot": {
+  "asof": "2026-11-10T08:52:00-05:00",
+  "date": "2026-11-10",
+  "sample": true,
+  "errors": [],
+  "nq": {
+   "price": 23381.97226746257,
+   "prev_date": "2026-11-09",
+   "pdo": 22890.09263578625,
+   "pdh": 23145.767769774044,
+   "pdl": 22830.115698766276,
+   "pdc": 23104.210470551083,
+   "onh": 23410.324334595764,
+   "onl": 23025.753010318735,
+   "on_range": 384.5713242770289,
+   "on_range_avg10": 422.9960149526236,
+   "prior_rth_range": 315.6520710077675,
+   "gap_pct": 1.2022128921718611
+  },
+  "es": {
+   "last": 6890.25,
+   "prev": 6861.5,
+   "chg_pct": 0.42
+  },
+  "vix": {
+   "last": 16.4,
+   "prev": 17.3,
+   "chg_pct": -5.2
+  },
+  "tnx": {
+   "last": 4.08,
+   "prev": 4.11,
+   "chg_bp": -3.0
+  },
+  "dxy": {
+   "last": 99.41,
+   "prev": 99.52,
+   "chg_pct": -0.11
+  },
+  "megacaps": [
+   {
+    "sym": "NVDA",
+    "weight": 9.5,
+    "last": 0,
+    "chg_pct": 2.8
+   },
+   {
+    "sym": "MSFT",
+    "weight": 8.5,
+    "last": 0,
+    "chg_pct": 0.6
+   },
+   {
+    "sym": "AAPL",
+    "weight": 8.5,
+    "last": 0,
+    "chg_pct": 0.3
+   },
+   {
+    "sym": "AMZN",
+    "weight": 5.5,
+    "last": 0,
+    "chg_pct": 0.9
+   },
+   {
+    "sym": "AVGO",
+    "weight": 5.0,
+    "last": 0,
+    "chg_pct": 1.7
+   },
+   {
+    "sym": "META",
+    "weight": 3.8,
+    "last": 0,
+    "chg_pct": 0.4
+   },
+   {
+    "sym": "GOOGL",
+    "weight": 3.0,
+    "last": 0,
+    "chg_pct": -0.2
+   },
+   {
+    "sym": "GOOG",
+    "weight": 2.8,
+    "last": 0,
+    "chg_pct": -0.1
+   },
+   {
+    "sym": "TSLA",
+    "weight": 3.0,
+    "last": 0,
+    "chg_pct": -1.1
+   },
+   {
+    "sym": "NFLX",
+    "weight": 1.8,
+    "last": 0,
+    "chg_pct": 0.2
+   },
+   {
+    "sym": "COST",
+    "weight": 1.8,
+    "last": 0,
+    "chg_pct": 0.1
+   },
+   {
+    "sym": "AMD",
+    "weight": 1.5,
+    "last": 0,
+    "chg_pct": 2.2
+   },
+   {
+    "sym": "PLTR",
+    "weight": 1.5,
+    "last": 0,
+    "chg_pct": 1.4
+   }
+  ],
+  "events": [
+   {
+    "time": "08:30",
+    "title": "Core PPI m/m",
+    "impact": "High",
+    "forecast": "0.2%",
+    "previous": "0.3%"
+   },
+   {
+    "time": "10:00",
+    "title": "Wholesale Inventories m/m",
+    "impact": "Medium",
+    "forecast": "0.1%",
+    "previous": "0.0%"
+   },
+   {
+    "time": "14:00",
+    "title": "Fed Governor Speaks",
+    "impact": "Medium",
+    "forecast": "",
+    "previous": ""
+   }
+  ],
+  "earnings": [
+   {
+    "sym": "AMD",
+    "when": "last night after close",
+    "eps_est": 1.17,
+    "eps_actual": null,
+    "rev_est": null,
+    "rev_actual": null
+   },
+   {
+    "sym": "CSCO",
+    "when": "today after close",
+    "eps_est": 0.98,
+    "eps_actual": null,
+    "rev_est": null,
+    "rev_actual": null
+   }
+  ],
+  "squawk": [
+   {
+    "title": "US Core PPI MoM Actual 0.1% (Forecast 0.2%, Previous 0.3%) (SAMPLE)",
+    "source": "FinancialJuice",
+    "time": "2026-11-10T08:31:00-05:00",
+    "url": "",
+    "fj": true,
+    "print": {
+     "name": "US Core PPI MoM",
+     "actual": 0.1,
+     "forecast": 0.2,
+     "previous": 0.3,
+     "unit": "%",
+     "surprise": -0.1
+    }
+   },
+   {
+    "title": "US PPI YoY Actual 2.4% (Forecast 2.6%, Previous 2.7%) (SAMPLE)",
+    "source": "FinancialJuice",
+    "time": "2026-11-10T08:30:00-05:00",
+    "url": "",
+    "fj": true,
+    "print": {
+     "name": "US PPI YoY",
+     "actual": 2.4,
+     "forecast": 2.6,
+     "previous": 2.7,
+     "unit": "%",
+     "surprise": -0.2
+    }
+   },
+   {
+    "title": "Fed's Waller: Further cuts appropriate if inflation keeps cooling (SAMPLE)",
+    "source": "FinancialJuice",
+    "time": "2026-11-10T08:12:00-05:00",
+    "url": "",
+    "fj": true
+   },
+   {
+    "title": "Nvidia +2.8% premarket, chip names firm after AMD results (SAMPLE)",
+    "source": "FinancialJuice",
+    "time": "2026-11-10T07:45:00-05:00",
+    "url": "",
+    "fj": true
+   },
+   {
+    "title": "China October exports beat expectations (SAMPLE)",
+    "source": "FinancialJuice",
+    "time": "2026-11-10T06:02:00-05:00",
+    "url": "",
+    "fj": true
+   }
+  ],
+  "headlines": [
+   {
+    "title": "Stock futures rise as chipmakers rally after AMD beat (SAMPLE)",
+    "source": "Sample",
+    "time": "2026-11-10T08:52:00-05:00",
+    "url": "",
+    "relevant": true
+   },
+   {
+    "title": "Producer prices come in softer than expected (SAMPLE)",
+    "source": "Sample",
+    "time": "2026-11-10T08:52:00-05:00",
+    "url": "",
+    "relevant": true
+   },
+   {
+    "title": "Treasury yields slip ahead of Fed speakers (SAMPLE)",
+    "source": "Sample",
+    "time": "2026-11-10T08:52:00-05:00",
+    "url": "",
+    "relevant": true
+   }
+  ],
+  "prints": [
+   {
+    "name": "US Core PPI MoM",
+    "actual": 0.1,
+    "forecast": 0.2,
+    "previous": 0.3,
+    "unit": "%",
+    "surprise": -0.1,
+    "time": "2026-11-10T08:31:00-05:00"
+   },
+   {
+    "name": "US PPI YoY",
+    "actual": 2.4,
+    "forecast": 2.6,
+    "previous": 2.7,
+    "unit": "%",
+    "surprise": -0.2,
+    "time": "2026-11-10T08:30:00-05:00"
+   }
+  ],
+  "breadth_pct": 0.9071174377224198,
+  "top_movers": [
+   {
+    "sym": "NVDA",
+    "weight": 9.5,
+    "last": 0,
+    "chg_pct": 2.8
+   },
+   {
+    "sym": "AMD",
+    "weight": 1.5,
+    "last": 0,
+    "chg_pct": 2.2
+   },
+   {
+    "sym": "AVGO",
+    "weight": 5.0,
+    "last": 0,
+    "chg_pct": 1.7
+   },
+   {
+    "sym": "PLTR",
+    "weight": 1.5,
+    "last": 0,
+    "chg_pct": 1.4
+   },
+   {
+    "sym": "TSLA",
+    "weight": 3.0,
+    "last": 0,
+    "chg_pct": -1.1
+   }
+  ]
+ },
+ "result": {
+  "score": 4.0,
+  "chop_score": 0,
+  "call": "STRONG LONG",
+  "direction": "long",
+  "confidence": 80,
+  "factors": [
+   {
+    "name": "Gap",
+    "value": "+1.20%",
+    "points": 1,
+    "note": "Gapping up over prior close",
+    "group": "direction"
+   },
+   {
+    "name": "Location",
+    "value": "Above PDH",
+    "points": 1,
+    "note": "Trading above prior-day high: buyers in control",
+    "group": "direction"
+   },
+   {
+    "name": "Overnight trend",
+    "value": "93% of ON range",
+    "points": 0.5,
+    "note": "Holding near overnight high",
+    "group": "direction"
+   },
+   {
+    "name": "Mega-cap breadth",
+    "value": "+0.91% wtd, 10/13 green",
+    "points": 1,
+    "note": "Generals leading higher premarket",
+    "group": "direction"
+   },
+   {
+    "name": "VIX",
+    "value": "16.4 (-5.2%)",
+    "points": 0.5,
+    "note": "Volatility crushed: risk-on",
+    "group": "direction"
+   },
+   {
+    "name": "10Y yield",
+    "value": "4.08% (-3.0bp)",
+    "points": 0,
+    "note": "Yields flat",
+    "group": "direction"
+   },
+   {
+    "name": "Dollar (DXY)",
+    "value": "99.41 (-0.11%)",
+    "points": 0,
+    "note": "Dollar flat",
+    "group": "direction"
+   }
+  ],
+  "chop_factors": [],
+  "levels": [
+   {
+    "name": "ONH",
+    "price": 23410.32
+   },
+   {
+    "name": "PDH",
+    "price": 23145.77
+   },
+   {
+    "name": "PDC",
+    "price": 23104.21
+   },
+   {
+    "name": "ONL",
+    "price": 23025.75
+   },
+   {
+    "name": "PD Mid",
+    "price": 22987.94
+   },
+   {
+    "name": "PDL",
+    "price": 22830.12
+   }
+  ],
+  "playbook": [
+   "Favor longs while above 23104; look for pullbacks to ONH/PDH to hold as support.",
+   "Bias invalidated on acceptance back below 23026 (ONL)."
+  ]
+ },
+ "narrative": {
+  "source": "template",
+  "text": "- NQ 23382, +1.20% vs prior close 23104. Overnight range 23026 to 23410.\n- Drivers: Gap +1.20%; Location Above PDH; Overnight trend 93% of ON range; Mega-cap breadth +0.91% wtd, 10/13 green; VIX 16.4 (-5.2%).\n- US Core PPI MoM: 0.1% vs 0.2% forecast (below)\n- US PPI YoY: 2.4% vs 2.6% forecast (below)\n- FJ 08:12: Fed's Waller: Further cuts appropriate if inflation keeps cooling (SAMPLE)\n- FJ 07:45: Nvidia +2.8% premarket, chip names firm after AMD results (SAMPLE)\n- FJ 06:02: China October exports beat expectations (SAMPLE)\n- 08:30 Core PPI m/m (fcst 0.2%, prev 0.3%)\n- 10:00 Wholesale Inventories m/m (fcst 0.1%, prev 0.0%)\n- 14:00 Fed Governor Speaks (fcst n/a, prev n/a)\n- Earnings: AMD last night after close\n- Earnings: CSCO today after close\n(Template summary. Add GEMINI_API_KEY for an AI-written read of the news.)",
+  "headline_tone": "n/a"
+ },
+ "posted": false,
+ "stats": {
+  "n": 24,
+  "hits": 14,
+  "hit_rate": 58,
+  "by_direction": {
+   "long": {
+    "n": 5,
+    "hits": 4,
+    "hit_rate": 80
+   },
+   "short": {
+    "n": 5,
+    "hits": 3,
+    "hit_rate": 60
+   },
+   "chop": {
+    "n": 14,
+    "hits": 7,
+    "hit_rate": 50
+   }
+  }
+ },
+ "sample_history": [
+  {
+   "date": "2026-10-07",
+   "call": "LEAN LONG",
+   "direction": "long",
+   "score": 2,
+   "chop_score": 0,
+   "confidence": 47,
+   "headline_tone": "n/a",
+   "price_at_call": 25574.692531175995,
+   "open": 25574.692531175995,
+   "close": 25895.513989196166,
+   "high": 25804.864763956575,
+   "low": 25370.094990926587,
+   "move_pct": 1.254,
+   "range_pts": 434.77,
+   "outcome": "long",
+   "hit": true
+  },
+  {
+   "date": "2026-10-08",
+   "call": "LEAN SHORT",
+   "direction": "short",
+   "score": -1,
+   "chop_score": 0,
+   "confidence": 32,
+   "headline_tone": "n/a",
+   "price_at_call": 25218.089098686472,
+   "open": 25218.089098686472,
+   "close": 25104.362361014402,
+   "high": 25445.051900574646,
+   "low": 25016.34438589698,
+   "move_pct": -0.451,
+   "range_pts": 428.71,
+   "outcome": "short",
+   "hit": true
+  },
+  {
+   "date": "2026-10-09",
+   "call": "CHOP / NEUTRAL",
+   "direction": "chop",
+   "score": -0.5,
+   "chop_score": 2.5,
+   "confidence": 28,
+   "headline_tone": "n/a",
+   "price_at_call": 24771.302260752444,
+   "open": 24771.302260752444,
+   "close": 25066.49491373524,
+   "high": 24994.243981099215,
+   "low": 24573.131842666422,
+   "move_pct": 1.192,
+   "range_pts": 421.11,
+   "outcome": "long",
+   "hit": false
+  },
+  {
+   "date": "2026-10-12",
+   "call": "CHOP / NEUTRAL",
+   "direction": "chop",
+   "score": 0,
+   "chop_score": 0.5,
+   "confidence": 32,
+   "headline_tone": "n/a",
+   "price_at_call": 24713.587307493035,
+   "open": 24713.587307493035,
+   "close": 24720.67677215179,
+   "high": 24936.00959326047,
+   "low": 24515.87860903309,
+   "move_pct": 0.029,
+   "range_pts": 420.13,
+   "outcome": "chop",
+   "hit": true
+  },
+  {
+   "date": "2026-10-13",
+   "call": "CHOP / NEUTRAL",
+   "direction": "chop",
+   "score": -0.5,
+   "chop_score": 0,
+   "confidence": 58,
+   "headline_tone": "n/a",
+   "price_at_call": 25176.953404019452,
+   "open": 25176.953404019452,
+   "close": 24888.60219292153,
+   "high": 25403.545984655626,
+   "low": 24975.537776787296,
+   "move_pct": -1.145,
+   "range_pts": 428.01,
+   "outcome": "short",
+   "hit": false
+  },
+  {
+   "date": "2026-10-14",
+   "call": "CHOP / NEUTRAL",
+   "direction": "chop",
+   "score": 0,
+   "chop_score": 0,
+   "confidence": 27,
+   "headline_tone": "n/a",
+   "price_at_call": 24941.068714035333,
+   "open": 24941.068714035333,
+   "close": 24956.550733619544,
+   "high": 25165.53833246165,
+   "low": 24741.54016432305,
+   "move_pct": 0.062,
+   "range_pts": 424.0,
+   "outcome": "chop",
+   "hit": true
+  },
+  {
+   "date": "2026-10-15",
+   "call": "CHOP / NEUTRAL",
+   "direction": "chop",
+   "score": -0.5,
+   "chop_score": 2.5,
+   "confidence": 67,
+   "headline_tone": "n/a",
+   "price_at_call": 25586.913655028795,
+   "open": 25586.913655028795,
+   "close": 25663.460502211685,
+   "high": 25817.195877924052,
+   "low": 25382.218345788566,
+   "move_pct": 0.299,
+   "range_pts": 434.98,
+   "outcome": "chop",
+   "hit": true
+  },
+  {
+   "date": "2026-10-16",
+   "call": "CHOP / NEUTRAL",
+   "direction": "chop",
+   "score": 0,
+   "chop_score": 0.5,
+   "confidence": 25,
+   "headline_tone": "n/a",
+   "price_at_call": 25064.72079564895,
+   "open": 25064.72079564895,
+   "close": 24891.674274753317,
+   "high": 25290.30328280979,
+   "low": 24864.20302928376,
+   "move_pct": -0.69,
+   "range_pts": 426.1,
+   "outcome": "short",
+   "hit": false
+  },
+  {
+   "date": "2026-10-19",
+   "call": "LEAN LONG",
+   "direction": "long",
+   "score": 2,
+   "chop_score": 2.5,
+   "confidence": 43,
+   "headline_tone": "n/a",
+   "price_at_call": 24783.586313305255,
+   "open": 24783.586313305255,
+   "close": 24808.210313037463,
+   "high": 25006.638590125,
+   "low": 24585.31762279881,
+   "move_pct": 0.099,
+   "range_pts": 421.32,
+   "outcome": "chop",
+   "hit": false
+  },
+  {
+   "date": "2026-10-20",
+   "call": "LEAN LONG",
+   "direction": "long",
+   "score": 2,
+   "chop_score": 0,
+   "confidence": 58,
+   "headline_tone": "n/a",
+   "price_at_call": 24679.94833839469,
+   "open": 24679.94833839469,
+   "close": 24961.810595391144,
+   "high": 24902.06787344024,
+   "low": 24482.508751687532,
+   "move_pct": 1.142,
+   "range_pts": 419.56,
+   "outcome": "long",
+   "hit": true
+  },
+  {
+   "date": "2026-10-21",
+   "call": "LEAN LONG",
+   "direction": "long",
+   "score": 1,
+   "chop_score": 1,
+   "confidence": 46,
+   "headline_tone": "n/a",
+   "price_at_call": 25253.723283140418,
+   "open": 25253.723283140418,
+   "close": 25422.766185045046,
+   "high": 25481.00679268868,
+   "low": 25051.693496875294,
+   "move_pct": 0.669,
+   "range_pts": 429.31,
+   "outcome": "long",
+   "hit": true
+  },
+  {
+   "date": "2026-10-22",
+   "call": "CHOP / NEUTRAL",
+   "direction": "chop",
+   "score": 0,
+   "chop_score": 0,
+   "confidence": 61,
+   "headline_tone": "n/a",
+   "price_at_call": 24963.955089339957,
+   "open": 24963.955089339957,
+   "close": 25141.865873136056,
+   "high": 25188.630685144013,
+   "low": 24764.24344862524,
+   "move_pct": 0.713,
+   "range_pts": 424.39,
+   "outcome": "long",
+   "hit": false
+  },
+  {
+   "date": "2026-10-23",
+   "call": "LEAN SHORT",
+   "direction": "short",
+   "score": -1.5,
+   "chop_score": 2.5,
+   "confidence": 44,
+   "headline_tone": "n/a",
+   "price_at_call": 25208.863917789982,
+   "open": 25208.863917789982,
+   "close": 24984.630349819527,
+   "high": 25435.743693050088,
+   "low": 25007.193006447662,
+   "move_pct": -0.89,
+   "range_pts": 428.55,
+   "outcome": "short",
+   "hit": true
+  },
+  {
+   "date": "2026-10-26",
+   "call": "LEAN SHORT",
+   "direction": "short",
+   "score": -1,
+   "chop_score": 1,
+   "confidence": 54,
+   "headline_tone": "n/a",
+   "price_at_call": 25388.396465891678,
+   "open": 25388.396465891678,
+   "close": 25740.649278483248,
+   "high": 25616.8920340847,
+   "low": 25185.289294164544,
+   "move_pct": 1.387,
+   "range_pts": 431.6,
+   "outcome": "long",
+   "hit": false
+  },
+  {
+   "date": "2026-10-27",
+   "call": "CHOP / NEUTRAL",
+   "direction": "chop",
+   "score": 0.5,
+   "chop_score": 1,
+   "confidence": 58,
+   "headline_tone": "n/a",
+   "price_at_call": 25220.12613544526,
+   "open": 25220.12613544526,
+   "close": 25558.232507061774,
+   "high": 25447.107270664266,
+   "low": 25018.3651263617,
+   "move_pct": 1.341,
+   "range_pts": 428.74,
+   "outcome": "long",
+   "hit": false
+  },
+  {
+   "date": "2026-10-28",
+   "call": "LEAN SHORT",
+   "direction": "short",
+   "score": -1.5,
+   "chop_score": 2.5,
+   "confidence": 66,
+   "headline_tone": "n/a",
+   "price_at_call": 24642.435824721204,
+   "open": 24642.435824721204,
+   "close": 24466.530596953606,
+   "high": 24864.21774714369,
+   "low": 24445.296338123433,
+   "move_pct": -0.714,
+   "range_pts": 418.92,
+   "outcome": "short",
+   "hit": true
+  },
+  {
+   "date": "2026-10-29",
+   "call": "CHOP / NEUTRAL",
+   "direction": "chop",
+   "score": 0.5,
+   "chop_score": 1,
+   "confidence": 64,
+   "headline_tone": "n/a",
+   "price_at_call": 25105.420373648045,
+   "open": 25105.420373648045,
+   "close": 24927.254723456917,
+   "high": 25331.369157010875,
+   "low": 24904.57701065886,
+   "move_pct": -0.71,
+   "range_pts": 426.79,
+   "outcome": "short",
+   "hit": false
+  },
+  {
+   "date": "2026-10-30",
+   "call": "CHOP / NEUTRAL",
+   "direction": "chop",
+   "score": 0,
+   "chop_score": 0,
+   "confidence": 49,
+   "headline_tone": "n/a",
+   "price_at_call": 25400.5953212575,
+   "open": 25400.5953212575,
+   "close": 25363.948326035472,
+   "high": 25629.200679148817,
+   "low": 25197.39055868744,
+   "move_pct": -0.144,
+   "range_pts": 431.81,
+   "outcome": "chop",
+   "hit": true
+  },
+  {
+   "date": "2026-11-02",
+   "call": "LEAN SHORT",
+   "direction": "short",
+   "score": -1.5,
+   "chop_score": 0,
+   "confidence": 55,
+   "headline_tone": "n/a",
+   "price_at_call": 25169.107503474323,
+   "open": 25169.107503474323,
+   "close": 25227.531432996704,
+   "high": 25395.629471005588,
+   "low": 24967.75464344653,
+   "move_pct": 0.232,
+   "range_pts": 427.87,
+   "outcome": "chop",
+   "hit": false
+  },
+  {
+   "date": "2026-11-03",
+   "call": "CHOP / NEUTRAL",
+   "direction": "chop",
+   "score": -0.5,
+   "chop_score": 0.5,
+   "confidence": 69,
+   "headline_tone": "n/a",
+   "price_at_call": 25185.074107405362,
+   "open": 25185.074107405362,
+   "close": 25217.15674258699,
+   "high": 25411.739774372007,
+   "low": 24983.59351454612,
+   "move_pct": 0.127,
+   "range_pts": 428.15,
+   "outcome": "chop",
+   "hit": true
+  },
+  {
+   "date": "2026-11-04",
+   "call": "CHOP / NEUTRAL",
+   "direction": "chop",
+   "score": 0.5,
+   "chop_score": 2.5,
+   "confidence": 57,
+   "headline_tone": "n/a",
+   "price_at_call": 25478.86666033804,
+   "open": 25478.86666033804,
+   "close": 25605.612380610473,
+   "high": 25708.17646028108,
+   "low": 25275.035727055336,
+   "move_pct": 0.497,
+   "range_pts": 433.14,
+   "outcome": "long",
+   "hit": false
+  },
+  {
+   "date": "2026-11-05",
+   "call": "CHOP / NEUTRAL",
+   "direction": "chop",
+   "score": 0.5,
+   "chop_score": 2.5,
+   "confidence": 61,
+   "headline_tone": "n/a",
+   "price_at_call": 25380.076489083556,
+   "open": 25380.076489083556,
+   "close": 25396.909738763978,
+   "high": 25608.497177485304,
+   "low": 25177.03587717089,
+   "move_pct": 0.066,
+   "range_pts": 431.46,
+   "outcome": "chop",
+   "hit": true
+  },
+  {
+   "date": "2026-11-06",
+   "call": "CHOP / NEUTRAL",
+   "direction": "chop",
+   "score": 0,
+   "chop_score": 0,
+   "confidence": 35,
+   "headline_tone": "n/a",
+   "price_at_call": 25076.353208699336,
+   "open": 25076.353208699336,
+   "close": 25100.025903207155,
+   "high": 25302.04038757763,
+   "low": 24875.74238302974,
+   "move_pct": 0.094,
+   "range_pts": 426.3,
+   "outcome": "chop",
+   "hit": true
+  },
+  {
+   "date": "2026-11-09",
+   "call": "LEAN LONG",
+   "direction": "long",
+   "score": 1,
+   "chop_score": 0.5,
+   "confidence": 37,
+   "headline_tone": "n/a",
+   "price_at_call": 24969.95516654808,
+   "open": 24969.95516654808,
+   "close": 25220.633550093542,
+   "high": 25194.68476304701,
+   "low": 24770.195525215695,
+   "move_pct": 1.004,
+   "range_pts": 424.49,
+   "outcome": "long",
+   "hit": true
+  },
+  {
+   "date": "2026-11-10",
+   "call": "STRONG LONG",
+   "direction": "long",
+   "score": 4.0,
+   "chop_score": 0,
+   "confidence": 80,
+   "headline_tone": "n/a",
+   "price_at_call": 23381.97226746257
+  }
+ ]
+}

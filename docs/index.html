@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NQ Daily Bias</title>
+<style>
+  :root{
+    --bg:#0b0d10; --panel:#13161b; --panel2:#181c22; --line:#232830;
+    --ink:#e8ebef; --ink2:#a3abb7; --muted:#6b7480;
+    --long:#22c55e; --long-bg:rgba(34,197,94,.12);
+    --short:#ef4444; --short-bg:rgba(239,68,68,.12);
+    --chop:#a3abb7; --chop-bg:rgba(163,171,183,.10);
+    --warn:#f59e0b; --accent:#60a5fa;
+    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 -apple-system,BlinkMacSystemFont,"Inter","Segoe UI",sans-serif}
+  .wrap{max-width:1200px;margin:0 auto;padding:20px}
+  header{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+  h1{font-size:15px;letter-spacing:.14em;text-transform:uppercase;margin:0;color:var(--ink2);font-weight:600}
+  h1 b{color:var(--ink)}
+  .meta{color:var(--muted);font-size:12px;font-family:var(--mono)}
+  .badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:600;letter-spacing:.06em}
+  .badge.sample{background:rgba(245,158,11,.15);color:var(--warn);margin-left:8px}
+  .grid{display:grid;gap:14px;grid-template-columns:repeat(12,1fr)}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;min-width:0}
+  .card h2{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 12px;font-weight:600}
+  .c12{grid-column:span 12}.c8{grid-column:span 8}.c7{grid-column:span 7}.c6{grid-column:span 6}.c5{grid-column:span 5}.c4{grid-column:span 4}
+  @media(max-width:900px){.c8,.c7,.c6,.c5,.c4{grid-column:span 12}}
+
+  /* hero */
+  .hero{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:14px;align-items:stretch}
+  @media(max-width:900px){.hero{grid-template-columns:1fr 1fr}}
+  .call{border-radius:12px;padding:18px 20px;border:1px solid var(--line)}
+  .call.long{background:var(--long-bg);border-color:rgba(34,197,94,.35)}
+  .call.short{background:var(--short-bg);border-color:rgba(239,68,68,.35)}
+  .call.chop{background:var(--chop-bg)}
+  .call .lbl{font-size:11px;letter-spacing:.12em;color:var(--ink2);text-transform:uppercase}
+  .call .val{font-size:34px;font-weight:800;letter-spacing:.02em;margin-top:4px;line-height:1.1}
+  .call.long .val{color:var(--long)} .call.short .val{color:var(--short)} .call.chop .val{color:var(--ink)}
+  .tile{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px}
+  .tile .lbl{font-size:11px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase}
+  .tile .num{font-size:28px;font-weight:700;font-family:var(--mono);margin-top:2px}
+  .tile .sub{color:var(--ink2);font-size:12px}
+  .meter{height:6px;background:var(--line);border-radius:999px;margin-top:10px;overflow:hidden}
+  .meter i{display:block;height:100%;border-radius:999px}
+
+  /* factor rows: diverging bar around zero */
+  .frow{display:grid;grid-template-columns:150px 1fr 54px;gap:12px;align-items:center;padding:7px 0;border-top:1px solid var(--line)}
+  .frow:first-of-type{border-top:0}
+  .fname{font-weight:600}.fname small{display:block;color:var(--muted);font-weight:400;font-family:var(--mono);font-size:11px}
+  .fbar{position:relative;height:22px}
+  .fbar:before{content:"";position:absolute;left:50%;top:0;bottom:0;width:1px;background:var(--line)}
+  .fbar i{position:absolute;top:5px;height:12px;border-radius:4px}
+  .fbar span{position:absolute;top:1px;font-size:12px;color:var(--ink2);white-space:nowrap}
+  .fpts{font-family:var(--mono);text-align:right;font-weight:600}
+  .pos{color:var(--long)} .neg{color:var(--short)} .zero{color:var(--muted)}
+  .chopf{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-top:1px solid var(--line)}
+  .chopf:first-child{border-top:0}
+  .chopf .ic{color:var(--warn);font-weight:700}
+  .empty{color:var(--muted);font-style:italic}
+
+  /* levels ladder */
+  .ladder{position:relative;height:300px;margin:6px 0 0 0}
+  .lv{position:absolute;left:0;right:0;display:flex;align-items:center;gap:8px;transform:translateY(-50%)}
+  .lv .ln{flex:1;border-top:1px dashed var(--line)}
+  .lv .nm{width:54px;font-size:12px;color:var(--ink2);font-weight:600}
+  .lv .px{width:84px;text-align:right;font-family:var(--mono);font-size:12px;color:var(--ink2)}
+  .lv.price .ln{border-top:2px solid var(--accent)} .lv.price .nm,.lv.price .px{color:var(--accent);font-weight:700}
+
+  ul.plain{list-style:none;margin:0;padding:0}
+  ul.plain li{padding:7px 0;border-top:1px solid var(--line)}
+  ul.plain li:first-child{border-top:0}
+  .t{font-family:var(--mono);color:var(--ink2);margin-right:8px}
+  .imp{font-size:10px;padding:1px 6px;border-radius:4px;margin-left:6px;font-weight:700}
+  .imp.High{background:var(--short-bg);color:var(--short)} .imp.Medium{background:rgba(245,158,11,.12);color:var(--warn)}
+  .narr{white-space:pre-wrap;color:var(--ink);line-height:1.65}
+  .src{color:var(--muted);font-size:11px;margin-top:10px}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{color:var(--muted);font-weight:600;text-align:left;font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:6px 8px;border-bottom:1px solid var(--line)}
+  td{padding:6px 8px;border-bottom:1px solid var(--line)}
+  td.r,th.r{text-align:right;font-family:var(--mono)}
+  a{color:var(--accent);text-decoration:none} a:hover{text-decoration:underline}
+  .hl small{color:var(--muted);font-size:11px;margin-left:6px}
+
+  /* track record */
+  .rec{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+  @media(max-width:700px){.rec{grid-template-columns:repeat(2,1fr)}}
+  .strip{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:14px}
+  .sq{width:26px;height:26px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;cursor:default}
+  .sq.hit{background:var(--long-bg);color:var(--long);border:1px solid rgba(34,197,94,.35)}
+  .sq.miss{background:var(--short-bg);color:var(--short);border:1px solid rgba(239,68,68,.35)}
+  .sq.pending{background:var(--panel2);color:var(--muted);border:1px solid var(--line)}
+  .note{color:var(--muted);font-size:12px}
+  .err{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.3);color:var(--warn);border-radius:8px;padding:8px 12px;font-size:12px;margin-bottom:14px}
+  .tip{position:fixed;pointer-events:none;background:#000;border:1px solid var(--line);color:var(--ink);padding:6px 9px;border-radius:6px;font-size:12px;max-width:280px;z-index:9;display:none}
+  footer{color:var(--muted);font-size:11px;text-align:center;margin:24px 0 8px}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"><p class="empty">Loading…</p></div>
+<div class="tip" id="tip"></div>
+<script>
+const $ = (h) => { const t = document.createElement('template'); t.innerHTML = h.trim(); return t.content.firstChild; };
+const esc = (s) => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmt = (n, d=2) => n == null || isNaN(n) ? '–' : Number(n).toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d});
+const sgn = (n, d=2) => n == null ? '–' : (n > 0 ? '+' : '') + Number(n).toFixed(d);
+const cls = (n) => n > 0 ? 'pos' : n < 0 ? 'neg' : 'zero';
+
+async function load() {
+  if (window.__DATA__) return window.__DATA__;
+  const bust = '?t=' + Date.now();
+  const [latest, history] = await Promise.all([
+    fetch('data/latest.json' + bust).then(r => r.json()),
+    fetch('data/history.json' + bust).then(r => r.json()).catch(() => null),
+  ]);
+  return { latest, history: latest.sample_history || history || [] };
+}
+
+function render({ latest, history }) {
+  const r = latest.result, s = latest.snapshot, nq = s.nq || {}, st = latest.stats || {};
+  const app = document.getElementById('app'); app.innerHTML = '';
+  const when = new Date(latest.generated || s.asof);
+
+  app.append($(`<header>
+    <h1><b>NQ</b> Daily Bias${s.sample ? '<span class="badge sample">SAMPLE DATA</span>' : ''}</h1>
+    <div class="meta">${esc(latest.date)} · generated ${when.toLocaleTimeString('en-US',{timeZone:'America/New_York',hour:'numeric',minute:'2-digit'})} ET</div>
+  </header>`));
+
+  if ((s.errors || []).length) app.append($(`<div class="err">Some sources failed this run: ${s.errors.map(esc).join(' · ')}</div>`));
+
+  // hero
+  const chopPct = Math.min(100, r.chop_score / 4 * 100);
+  app.append($(`<div class="hero" style="margin-bottom:14px">
+    <div class="call ${r.direction}"><div class="lbl">Today's bias</div><div class="val">${esc(r.call)}</div>
+      <div class="sub" style="color:var(--ink2);margin-top:6px">Context for your own setups. Not a trade signal.</div></div>
+    <div class="tile"><div class="lbl">Direction score</div><div class="num ${cls(r.score)}">${sgn(r.score,1)}</div>
+      <div class="sub">range −5 to +5 · ${r.confidence}% confidence</div>
+      <div class="meter"><i style="width:${r.confidence}%;background:${r.direction==='long'?'var(--long)':r.direction==='short'?'var(--short)':'var(--chop)'}"></i></div></div>
+    <div class="tile"><div class="lbl">Chop risk</div><div class="num">${fmt(r.chop_score,1)}</div>
+      <div class="sub">${r.chop_score >= 2.5 ? 'High: stand aside or fade edges' : r.chop_score >= 1 ? 'Moderate' : 'Low'}</div>
+      <div class="meter"><i style="width:${chopPct}%;background:var(--warn)"></i></div></div>
+    <div class="tile"><div class="lbl">NQ last</div><div class="num">${fmt(nq.price,2)}</div>
+      <div class="sub"><span class="${cls(nq.gap_pct)}">${sgn(nq.gap_pct)}%</span> vs prior close ${fmt(nq.pdc,2)}</div></div>
+  </div>`));
+
+  const grid = $(`<div class="grid"></div>`); app.append(grid);
+
+  // narrative
+  const n = latest.narrative || {};
+  grid.append($(`<div class="card c7"><h2>Morning read</h2><div class="narr">${esc(n.text)}</div>
+    <div class="src">Written by: ${esc(n.source)}${n.headline_tone && n.headline_tone !== 'n/a' ? ' · headline tone: ' + esc(n.headline_tone) : ''}</div></div>`));
+
+  // playbook
+  grid.append($(`<div class="card c5"><h2>Plan</h2><ul class="plain">${(r.playbook||[]).map(p=>`<li>${esc(p)}</li>`).join('') || '<li class="empty">n/a</li>'}</ul></div>`));
+
+  // factors
+  const fcard = $(`<div class="card c7"><h2>Why: scoring factors</h2></div>`);
+  const maxP = 1.5;
+  (r.factors || []).forEach(f => {
+    const w = Math.abs(f.points) / maxP * 50;
+    const bar = f.points > 0 ? `<i style="left:50%;width:${w}%;background:var(--long)"></i><span style="right:calc(50% + 8px)">${esc(f.note)}</span>`
+              : f.points < 0 ? `<i style="right:50%;width:${w}%;background:var(--short)"></i><span style="left:calc(50% + 8px)">${esc(f.note)}</span>`
+              : `<span style="left:calc(50% + 8px);color:var(--muted)">${esc(f.note)}</span>`;
+    fcard.append($(`<div class="frow" data-tip="${esc(f.name)}: ${esc(f.value)} → ${sgn(f.points,1)} pts"><div class="fname">${esc(f.name)}<small>${esc(f.value)}</small></div>
+      <div class="fbar">${bar}</div><div class="fpts ${cls(f.points)}">${sgn(f.points,1)}</div></div>`));
+  });
+  grid.append(fcard);
+
+  // levels ladder
+  const lv = (r.levels || []).slice();
+  const lcard = $(`<div class="card c5"><h2>Key levels</h2></div>`);
+  if (lv.length && nq.price) {
+    const all = lv.map(l => l.price).concat([nq.price]);
+    const hi = Math.max(...all), lo = Math.min(...all), pad = (hi - lo) * 0.08 || 10;
+    const y = p => (1 - (p - (lo - pad)) / ((hi + pad) - (lo - pad))) * 100;
+    const lad = $(`<div class="ladder"></div>`);
+    // keep labels from colliding: enforce min 7% spacing top-down
+    const items = lv.map(l => ({...l})).concat([{name:'NOW', price:nq.price, now:true}]).sort((a,b)=>b.price-a.price);
+    let last = -100; items.forEach(it => { it.y = Math.max(y(it.price), last + 7.5); last = it.y; });
+    const over = Math.max(0, last - 100); items.forEach(it => it.y -= over * (it.y / (last || 1)));
+    items.forEach(it => lad.append($(`<div class="lv ${it.now?'price':''}" style="top:${it.y}%" data-tip="${esc(it.name)} ${fmt(it.price)} · ${sgn(nq.price - it.price,0)} pts from price">
+      <div class="nm">${esc(it.name)}</div><div class="ln"></div><div class="px">${fmt(it.price)}</div></div>`)));
+    lcard.append(lad);
+    lcard.append($(`<div class="note" style="margin-top:8px">ON range ${fmt(nq.on_range,0)} pts${nq.on_range_avg10?` (10-day avg ${fmt(nq.on_range_avg10,0)})`:''} · prior RTH range ${fmt(nq.prior_rth_range,0)} pts</div>`));
+  } else lcard.append($(`<p class="empty">No price data</p>`));
+  grid.append(lcard);
+
+  // chop factors
+  grid.append($(`<div class="card c4"><h2>Chop warnings</h2>${(r.chop_factors||[]).length ? (r.chop_factors).map(c=>
+    `<div class="chopf"><span class="ic">⚠</span><div><b>${esc(c.name)}</b> <span class="note">${esc(c.value)}</span><div class="note" style="color:var(--ink2)">${esc(c.note)}</div></div></div>`).join('')
+    : '<p class="empty">None. Conditions favor directional trade.</p>'}</div>`));
+
+  // events
+  grid.append($(`<div class="card c4"><h2>Economic calendar (ET)</h2><ul class="plain">${(s.events||[]).map(e=>
+    `<li><span class="t">${esc(e.time)}</span>${esc(e.title)}<span class="imp ${esc(e.impact)}">${esc(e.impact.toUpperCase())}</span>
+     ${e.forecast||e.previous?`<div class="note">fcst ${esc(e.forecast||'–')} · prev ${esc(e.previous||'–')}</div>`:''}</li>`).join('') || '<li class="empty">No high or medium USD events</li>'}</ul></div>`));
+
+  // earnings
+  grid.append($(`<div class="card c4"><h2>Earnings (watchlist)</h2><ul class="plain">${(s.earnings||[]).map(e=>{
+    const beat = e.eps_actual!=null && e.eps_est!=null ? (e.eps_actual>=e.eps_est?'<span class="pos">beat</span>':'<span class="neg">miss</span>') : '';
+    return `<li><b>${esc(e.sym)}</b> <span class="note">${esc(e.when)}</span>
+      <div class="note">EPS est ${e.eps_est??'–'}${e.eps_actual!=null?` · actual ${e.eps_actual} ${beat}`:''}</div></li>`}).join('') || '<li class="empty">No watchlist earnings around today</li>'}</ul></div>`));
+
+  // movers
+  const mc = (s.megacaps||[]).slice().sort((a,b)=>Math.abs(b.chg_pct)-Math.abs(a.chg_pct));
+  grid.append($(`<div class="card c5"><h2>Mega-cap premarket · weighted ${sgn(s.breadth_pct)}%</h2><table>
+    <tr><th>Ticker</th><th class="r">Wt</th><th class="r">Chg</th></tr>
+    ${mc.map(m=>`<tr><td><b>${esc(m.sym)}</b></td><td class="r">${fmt(m.weight,1)}%</td><td class="r ${cls(m.chg_pct)}">${sgn(m.chg_pct)}%</td></tr>`).join('')}
+  </table><div class="note" style="margin-top:8px">Macro: ES <span class="${cls(s.es?.chg_pct)}">${sgn(s.es?.chg_pct)}%</span> ·
+    VIX ${fmt(s.vix?.last,1)} (<span class="${cls(-(s.vix?.chg_pct||0))}">${sgn(s.vix?.chg_pct,1)}%</span>) ·
+    10Y ${fmt(s.tnx?.last,2)}% (${sgn(s.tnx?.chg_bp,1)}bp) · DXY ${fmt(s.dxy?.last,2)}</div></div>`));
+
+  // FinancialJuice squawk + data prints
+  const tET = (iso) => new Date(iso).toLocaleTimeString('en-US',{timeZone:'America/New_York',hour:'numeric',minute:'2-digit'});
+  const prints = s.prints || [];
+  const sq = (s.squawk || []).filter(x => !x.print);
+  const other = s.headlines || [];
+  grid.append($(`<div class="card c7"><h2>FinancialJuice squawk</h2>
+    ${prints.length ? `<table style="margin-bottom:12px"><tr><th>Data print</th><th class="r">Actual</th><th class="r">Fcst</th><th class="r">Prev</th><th>vs fcst</th></tr>
+      ${prints.map(p=>`<tr><td>${esc(p.name)} <span class="note">${tET(p.time)}</span></td><td class="r"><b>${p.actual}${esc(p.unit)}</b></td><td class="r">${p.forecast}${esc(p.unit)}</td><td class="r">${p.previous ?? '–'}${p.previous!=null?esc(p.unit):''}</td>
+        <td>${p.surprise > 0 ? '▲ above' : p.surprise < 0 ? '▼ below' : '= in line'}</td></tr>`).join('')}</table>` : ''}
+    <ul class="plain hl">${sq.map(x=>`<li><span class="t">${tET(x.time)}</span>${x.url?`<a href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.title)}</a>`:esc(x.title)}</li>`).join('') || '<li class="empty">No FinancialJuice headlines fetched</li>'}</ul>
+    ${other.length ? `<h2 style="margin-top:16px">Other headlines</h2><ul class="plain hl">${other.slice(0,6).map(x=>`<li>${x.url?`<a href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.title)}</a>`:esc(x.title)}<small>${esc(x.source)} · ${tET(x.time)}</small></li>`).join('')}</ul>` : ''}
+  </div>`));
+
+  // track record
+  const rec = $(`<div class="card c12"><h2>Track record: does the bias actually work?</h2></div>`);
+  const bd = st.by_direction || {};
+  const pct = (o) => o && o.n ? `${o.hit_rate}%` : '–';
+  rec.append($(`<div class="rec">
+    <div class="tile"><div class="lbl">Overall hit rate</div><div class="num">${st.n ? st.hit_rate + '%' : '–'}</div><div class="sub">${st.hits||0} of ${st.n||0} graded days</div></div>
+    <div class="tile"><div class="lbl">Long calls</div><div class="num pos">${pct(bd.long)}</div><div class="sub">${bd.long?.n||0} days</div></div>
+    <div class="tile"><div class="lbl">Short calls</div><div class="num neg">${pct(bd.short)}</div><div class="sub">${bd.short?.n||0} days</div></div>
+    <div class="tile"><div class="lbl">Chop calls</div><div class="num">${pct(bd.chop)}</div><div class="sub">${bd.chop?.n||0} days</div></div>
+  </div>`));
+  const recent = history.slice(-30);
+  const strip = $(`<div class="strip"></div>`);
+  recent.forEach(h => {
+    const state = 'hit' in h ? (h.hit ? 'hit' : 'miss') : 'pending';
+    strip.append($(`<div class="sq ${state}" data-tip="${esc(h.date)}: called ${esc(h.call)} (${sgn(h.score,1)})${'outcome' in h ? ` → ${esc(h.outcome)} ${sgn(h.move_pct)}%` : ' → not graded yet'}">${state==='hit'?'✓':state==='miss'?'✗':'·'}</div>`));
+  });
+  rec.append(strip);
+  rec.append($(`<div class="note">Graded at the close: RTH close vs open beyond ±0.40% = trend day (long/short), otherwise chop. A random guess across three outcomes lands near 33%. Give it 30+ graded days before trusting or tuning anything.</div>`));
+  const tbl = $(`<table style="margin-top:12px"><tr><th>Date</th><th>Call</th><th class="r">Score</th><th class="r">Chop</th><th>Outcome</th><th class="r">Move</th><th class="r">Range</th><th></th></tr></table>`);
+  history.slice(-12).reverse().forEach(h => tbl.append($(`<tr><td class="t">${esc(h.date)}</td><td>${esc(h.call)}</td>
+    <td class="r ${cls(h.score)}">${sgn(h.score,1)}</td><td class="r">${fmt(h.chop_score,1)}</td><td>${esc(h.outcome||'–')}</td>
+    <td class="r ${cls(h.move_pct)}">${h.move_pct!=null?sgn(h.move_pct)+'%':'–'}</td><td class="r">${h.range_pts!=null?fmt(h.range_pts,0):'–'}</td>
+    <td>${'hit' in h ? (h.hit?'<span class="pos">✓ hit</span>':'<span class="neg">✗ miss</span>') : '<span class="note">pending</span>'}</td></tr>`)));
+  rec.append(tbl);
+  grid.append(rec);
+
+  app.append($(`<footer>Free data: Yahoo Finance (delayed), ForexFactory calendar, FinancialJuice, Nasdaq earnings calendar, CNBC/MarketWatch RSS. Informational only, not financial advice.</footer>`));
+
+  // tooltips
+  const tip = document.getElementById('tip');
+  app.querySelectorAll('[data-tip]').forEach(el => {
+    el.addEventListener('mousemove', e => { tip.textContent = el.dataset.tip; tip.style.display = 'block';
+      tip.style.left = Math.min(e.clientX + 12, innerWidth - 290) + 'px'; tip.style.top = (e.clientY + 14) + 'px'; });
+    el.addEventListener('mouseleave', () => tip.style.display = 'none');
+  });
+}
+
+load().then(render).catch(e => {
+  document.getElementById('app').innerHTML = `<p class="empty">No data yet. The first brief appears after the morning run. (${esc(e.message)})</p>`;
+});
+</script>
+</body>
+</html>
